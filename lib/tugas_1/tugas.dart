@@ -44,6 +44,7 @@ class Tugas1Flutter extends StatelessWidget {
               color: Color(0xff295F98)
             ),
           ),
+          Image.asset("assets/images/river.jpg")
         ],
       ),
       backgroundColor: Color(0xffEBF4DD),
