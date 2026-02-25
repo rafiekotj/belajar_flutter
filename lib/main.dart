@@ -6,7 +6,8 @@
 // import 'package:belajar_flutter/tugas_6/login.dart';
 // import 'package:belajar_flutter/tugas_6/register.dart';
 // import 'package:belajar_flutter/tugas_7/tugas7.dart';
-import 'package:belajar_flutter/tugas_8/tugas8.dart';
+// import 'package:belajar_flutter/tugas_8/tugas8.dart';
+import 'package:belajar_flutter/tugas_9/tugas9.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -21,12 +22,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        fontFamily: 'Inter',
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: const Tugas8Flutter(),
+      title: 'Belajar Flutter',
+      theme: ThemeData(fontFamily: 'Inter'),
+      home: Tugas9Flutter(),
       // routes: {
       //   '/login': (context) => LoginPage(),
       //   '/register': (context) => RegisterPage(),

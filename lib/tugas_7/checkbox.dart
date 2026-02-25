@@ -19,15 +19,24 @@ class _CheckboxPageState extends State<CheckboxPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            CheckboxListTile(
-              value: _isChecked,
-              onChanged: (bool? newValue) {
-                setState(() {
-                  _isChecked = newValue ?? false;
-                });
-              },
-              title: Text("Saya menyetujui semua persyaratan yang berlaku"),
-              activeColor: AppColor.primary,
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    "Saya menyetujui semua persyaratan yang berlaku",
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ),
+                Checkbox(
+                  value: _isChecked,
+                  onChanged: (bool? newValue) {
+                    setState(() {
+                      _isChecked = newValue ?? false;
+                    });
+                  },
+                  activeColor: AppColor.primary,
+                ),
+              ],
             ),
 
             SizedBox(height: 16),

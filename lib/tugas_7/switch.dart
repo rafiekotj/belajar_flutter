@@ -14,7 +14,7 @@ class _SwitchPageState extends State<SwitchPage> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: _isDarkMode ? Colors.black : Colors.white,
+      color: _isDarkMode ? AppColor.backgroundDark : AppColor.backgroundLight,
       width: double.infinity,
       height: double.infinity,
       child: Center(
@@ -23,22 +23,29 @@ class _SwitchPageState extends State<SwitchPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SwitchListTile(
-                value: _isDarkMode,
-                onChanged: (bool value) {
-                  setState(() {
-                    _isDarkMode = value;
-                  });
-                },
-
-                activeThumbColor: AppColor.primary,
-
-                title: Text(
-                  "Aktifkan Mode Gelap",
-                  style: TextStyle(
-                    color: _isDarkMode ? Colors.white : Colors.black,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "Aktifkan Mode Gelap",
+                    style: TextStyle(
+                      color: _isDarkMode
+                          ? AppColor.textOnPrimary
+                          : AppColor.textPrimary,
+                      fontSize: 16,
+                    ),
                   ),
-                ),
+                  SizedBox(width: 16),
+                  Switch(
+                    value: _isDarkMode,
+                    onChanged: (bool value) {
+                      setState(() {
+                        _isDarkMode = value;
+                      });
+                    },
+                    activeThumbColor: AppColor.primary,
+                  ),
+                ],
               ),
               SizedBox(height: 20),
               Text(
@@ -46,7 +53,9 @@ class _SwitchPageState extends State<SwitchPage> {
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: _isDarkMode ? Colors.white : Colors.black,
+                  color: _isDarkMode
+                      ? AppColor.textOnPrimary
+                      : AppColor.textPrimary,
                 ),
               ),
             ],

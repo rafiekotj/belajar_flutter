@@ -1,27 +1,23 @@
 import 'package:belajar_flutter/constant/app_color.dart';
-import 'package:belajar_flutter/tugas_7/checkbox.dart';
-import 'package:belajar_flutter/tugas_7/date_picker.dart';
-import 'package:belajar_flutter/tugas_7/dropdown.dart';
-import 'package:belajar_flutter/tugas_7/switch.dart';
-import 'package:belajar_flutter/tugas_7/time_picker.dart';
+import 'package:belajar_flutter/tugas_9/list.dart';
+import 'package:belajar_flutter/tugas_9/list_map.dart';
+import 'package:belajar_flutter/tugas_9/listmodel.dart';
 import 'package:flutter/material.dart';
 
-class Tugas7Flutter extends StatefulWidget {
-  const Tugas7Flutter({super.key});
+class Tugas9Flutter extends StatefulWidget {
+  const Tugas9Flutter({super.key});
 
   @override
-  State<Tugas7Flutter> createState() => _Tugas7FlutterState();
+  State<Tugas9Flutter> createState() => _Tugas9FlutterState();
 }
 
-class _Tugas7FlutterState extends State<Tugas7Flutter> {
+class _Tugas9FlutterState extends State<Tugas9Flutter> {
   int _selectedIndex = 0;
 
   static const List<Widget> _widgetOptions = <Widget>[
-    CheckboxPage(),
-    SwitchPage(),
-    DropdownPage(),
-    DatePickerPage(),
-    TimePickerPage(),
+    Soal1List(),
+    Soal2ListMap(),
+    Soal3Model(),
   ];
 
   void _onItemTapped(int index) {
@@ -37,14 +33,10 @@ class _Tugas7FlutterState extends State<Tugas7Flutter> {
       appBar: AppBar(
         title: Text(
           _selectedIndex == 0
-              ? "Syarat & Ketentuan"
+              ? "Soal 1"
               : _selectedIndex == 1
-              ? "Mode Gelap"
-              : _selectedIndex == 2
-              ? "Pilih Kategori Produk"
-              : _selectedIndex == 3
-              ? "Pilih Tanggal Lahir"
-              : "Atur Pengingat",
+              ? "Soal 2"
+              : "Soal 3",
           style: TextStyle(fontWeight: FontWeight.w600),
         ),
         backgroundColor: AppColor.primary,
@@ -60,16 +52,16 @@ class _Tugas7FlutterState extends State<Tugas7Flutter> {
               decoration: BoxDecoration(color: AppColor.primary),
               child: Text(""),
             ),
-            // Checkbox
+            // Soal 1
             ListTile(
               leading: Icon(
-                Icons.check_box,
+                Icons.looks_one,
                 color: _selectedIndex == 0
                     ? AppColor.primary
                     : AppColor.textSecondary,
               ),
               title: Text(
-                "Checkbox",
+                "Soal 1",
                 style: TextStyle(
                   color: _selectedIndex == 0
                       ? AppColor.primary
@@ -81,16 +73,16 @@ class _Tugas7FlutterState extends State<Tugas7Flutter> {
               onTap: () => _onItemTapped(0),
             ),
 
-            // Switch
+            // Soal 2
             ListTile(
               leading: Icon(
-                Icons.sunny,
+                Icons.looks_two,
                 color: _selectedIndex == 1
                     ? AppColor.primary
                     : AppColor.textSecondary,
               ),
               title: Text(
-                "Switch",
+                "Soal 2",
                 style: TextStyle(
                   color: _selectedIndex == 1
                       ? AppColor.primary
@@ -102,16 +94,16 @@ class _Tugas7FlutterState extends State<Tugas7Flutter> {
               onTap: () => _onItemTapped(1),
             ),
 
-            // Dropdown
+            // Soal 3
             ListTile(
               leading: Icon(
-                Icons.keyboard_double_arrow_down,
+                Icons.looks_3,
                 color: _selectedIndex == 2
                     ? AppColor.primary
                     : AppColor.textSecondary,
               ),
               title: Text(
-                "Dropdown",
+                "Soal 3",
                 style: TextStyle(
                   color: _selectedIndex == 2
                       ? AppColor.primary
@@ -121,48 +113,6 @@ class _Tugas7FlutterState extends State<Tugas7Flutter> {
               selected: _selectedIndex == 2,
               selectedTileColor: AppColor.primarySoft,
               onTap: () => _onItemTapped(2),
-            ),
-
-            // Date Picker
-            ListTile(
-              leading: Icon(
-                Icons.calendar_today,
-                color: _selectedIndex == 3
-                    ? AppColor.primary
-                    : AppColor.textSecondary,
-              ),
-              title: Text(
-                "Date Picker",
-                style: TextStyle(
-                  color: _selectedIndex == 3
-                      ? AppColor.primary
-                      : AppColor.textPrimary,
-                ),
-              ),
-              selected: _selectedIndex == 3,
-              selectedTileColor: AppColor.primarySoft,
-              onTap: () => _onItemTapped(3),
-            ),
-
-            // Time Picker
-            ListTile(
-              leading: Icon(
-                Icons.access_time,
-                color: _selectedIndex == 4
-                    ? AppColor.primary
-                    : AppColor.textSecondary,
-              ),
-              title: Text(
-                "Time Picker",
-                style: TextStyle(
-                  color: _selectedIndex == 4
-                      ? AppColor.primary
-                      : AppColor.textPrimary,
-                ),
-              ),
-              selected: _selectedIndex == 4,
-              selectedTileColor: AppColor.primarySoft,
-              onTap: () => _onItemTapped(4),
             ),
           ],
         ),
