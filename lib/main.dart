@@ -7,7 +7,9 @@
 // import 'package:belajar_flutter/tugas_6/register.dart';
 // import 'package:belajar_flutter/tugas_7/tugas7.dart';
 // import 'package:belajar_flutter/tugas_8/tugas8.dart';
-import 'package:belajar_flutter/tugas_9/tugas9.dart';
+// import 'package:belajar_flutter/tugas_9/tugas9.dart';
+import 'package:belajar_flutter/constant/app_color.dart';
+import 'package:belajar_flutter/tugas_10/tugas10.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -23,8 +25,13 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Belajar Flutter',
-      theme: ThemeData(fontFamily: 'Inter'),
-      home: Tugas9Flutter(),
+      theme: ThemeData(
+        fontFamily: 'Inter',
+        textSelectionTheme: TextSelectionThemeData(
+          selectionHandleColor: AppColor.secondary,
+        ),
+      ),
+      home: Tugas10Flutter(),
       // routes: {
       //   '/login': (context) => LoginPage(),
       //   '/register': (context) => RegisterPage(),
