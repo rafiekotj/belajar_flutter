@@ -25,6 +25,11 @@ extension ExtendedNavigator on BuildContext {
     return Navigator.of(this).pushNamed(routeName, arguments: arguments);
   }
 
+  // Future<dynamic> pushReplacementNamed(String newRouteName,
+  //     {Object? arguments}) {
+  //   Navigator.popUntil(this, ModalRoute.withName(newRouteName));
+  //   return Navigator.pushNamed(this, newRouteName, arguments: arguments);
+  // }
   Future<dynamic> pushReplacementNamed(
     String newRouteName, {
     Object? arguments,
@@ -47,15 +52,14 @@ extension ExtendedNavigator on BuildContext {
     );
   }
 
-  Future<dynamic> pushNamedAndRemoveAll(
-    String newRouteName, {
-    Object? arguments,
-  }) async {
-    Navigator.pushNamedAndRemoveUntil(
+  Future<dynamic> pushAndRemoveAll(Widget page, {String? name}) async {
+    return Navigator.pushAndRemoveUntil(
       this,
-      newRouteName,
+      MaterialPageRoute(
+        builder: (_) => page,
+        settings: RouteSettings(name: name ?? page.runtimeType.toString()),
+      ),
       (route) => false,
-      arguments: arguments,
     );
   }
 

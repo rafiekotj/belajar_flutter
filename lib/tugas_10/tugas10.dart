@@ -1,6 +1,7 @@
 import 'package:belajar_flutter/constant/app_color.dart';
 import 'package:belajar_flutter/tugas_10/extension/navigator.dart';
 import 'package:belajar_flutter/tugas_10/home_daftar.dart';
+import 'package:belajar_flutter/tugas_11/database/preference.dart';
 import 'package:flutter/material.dart';
 
 class Tugas10Flutter extends StatefulWidget {
@@ -380,12 +381,19 @@ class _Tugas10FlutterState extends State<Tugas10Flutter> {
                   height: 48,
                   child: ElevatedButton(
                     onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        // print("Berhasil tervalidasi");
-                        dialogError(context);
-                      } else {
-                        // print("Tidak Berhasil tervalidasi");
-                      }
+                      PreferenceHandler().storingIsLogin(true);
+                      context.push(
+                        HomeDaftarPage(
+                          // name: nameController.text,
+                          // phone: phoneController.text,
+                        ),
+                      );
+                      // if (_formKey.currentState!.validate()) {
+                      //   print("Berhasil tervalidasi");
+                      //   dialogError(context);
+                      // } else {
+                      //   print("Tidak Berhasil tervalidasi");
+                      // }
                       // print(nameController.text);
                       // print(emailController.text);
                       // print(passwordController.text);
@@ -430,7 +438,10 @@ class _Tugas10FlutterState extends State<Tugas10Flutter> {
                   width: double.infinity,
                   height: 48,
                   child: OutlinedButton(
-                    onPressed: () {},
+                    onPressed: () async {
+                      // var dataIsLogin = PreferenceHandler.getIsLogin();
+                      // print(dataIsLogin);
+                    },
                     style: OutlinedButton.styleFrom(
                       padding: EdgeInsets.symmetric(horizontal: 16),
                       side: BorderSide(color: AppColor.textHint),
@@ -519,8 +530,8 @@ class _Tugas10FlutterState extends State<Tugas10Flutter> {
                         context.pop();
                         context.push(
                           HomeDaftarPage(
-                            name: nameController.text,
-                            phone: phoneController.text,
+                            // name: nameController.text,
+                            // phone: phoneController.text,
                           ),
                         );
                       },
