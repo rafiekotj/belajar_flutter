@@ -1,6 +1,11 @@
 import 'package:belajar_flutter/constant/app_color.dart';
 import 'package:belajar_flutter/tugas_10/extension/navigator.dart';
-import 'package:belajar_flutter/tugas_10/home_daftar.dart';
+// import 'package:belajar_flutter/tugas_10/home_daftar.dart';
+import 'package:belajar_flutter/tugas_10/components/custom_text_field.dart';
+import 'package:belajar_flutter/tugas_11/database/preference.dart';
+import 'package:belajar_flutter/tugas_11/database/sqflite.dart';
+import 'package:belajar_flutter/tugas_11/models/user_model.dart';
+import 'package:belajar_flutter/tugas_11/views/drawer.dart';
 import 'package:flutter/material.dart';
 
 class Tugas10Flutter extends StatefulWidget {
@@ -56,132 +61,10 @@ class _Tugas10FlutterState extends State<Tugas10Flutter> {
 
                 SizedBox(height: 16),
 
-                TextFormField(
-                  controller: nameController,
-                  cursorColor: AppColor.textHint,
-
-                  decoration: InputDecoration(
-                    isDense: true,
-                    hintText: "Name",
-                    hintStyle: TextStyle(
-                      color: AppColor.textHint,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-
-                    contentPadding: EdgeInsets.all(12),
-
-                    prefixIcon: Icon(Icons.person, size: 20),
-                    prefixIconColor: WidgetStateColor.resolveWith((states) {
-                      if (states.contains(WidgetState.error)) {
-                        return AppColor.error;
-                      }
-                      if (states.contains(WidgetState.focused)) {
-                        return AppColor.secondary;
-                      }
-                      return AppColor.textHint;
-                    }),
-
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: AppColor.textHint),
-                    ),
-
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: AppColor.secondary),
-                    ),
-
-                    errorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: AppColor.error),
-                    ),
-
-                    focusedErrorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: AppColor.error),
-                    ),
-
-                    errorStyle: TextStyle(
-                      color: AppColor.error,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-
-                  validator: (value) {
-                    final name = value ?? "";
-                    if (name.isEmpty) {
-                      return "Nama tidak boleh kosong";
-                    }
-                    if (name.length < 2) {
-                      return "Nama minimal 2 karakter";
-                    }
-
-                    final nameRegex = RegExp(r'^[a-zA-Z\s]+$');
-                    if (!nameRegex.hasMatch(name)) {
-                      return "Nama hanya boleh huruf";
-                    }
-
-                    return null;
-                  },
-                ),
-
-                SizedBox(height: 8),
-
-                TextFormField(
+                CustomTextField(
                   controller: emailController,
-                  cursorColor: AppColor.textHint,
-
-                  decoration: InputDecoration(
-                    isDense: true,
-                    hintText: "Email",
-                    hintStyle: TextStyle(
-                      color: AppColor.textHint,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-
-                    contentPadding: EdgeInsets.all(12),
-
-                    prefixIcon: Icon(Icons.email_outlined, size: 20),
-                    prefixIconColor: WidgetStateColor.resolveWith((states) {
-                      if (states.contains(WidgetState.error)) {
-                        return AppColor.error;
-                      }
-                      if (states.contains(WidgetState.focused)) {
-                        return AppColor.secondary;
-                      }
-                      return AppColor.textHint;
-                    }),
-
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: AppColor.textHint),
-                    ),
-
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: AppColor.secondary),
-                    ),
-
-                    errorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: AppColor.error),
-                    ),
-
-                    focusedErrorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: AppColor.error),
-                    ),
-
-                    errorStyle: TextStyle(
-                      color: AppColor.error,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-
+                  hintText: "Email",
+                  prefixIcon: Icons.email_outlined,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return "Email tidak boleh kosong";
@@ -195,77 +78,18 @@ class _Tugas10FlutterState extends State<Tugas10Flutter> {
 
                 SizedBox(height: 8),
 
-                TextFormField(
+                CustomTextField(
                   controller: passwordController,
-                  cursorColor: AppColor.textHint,
+                  hintText: "Kata Sandi",
+                  prefixIcon: Icons.lock_outline,
                   obscureText: isVisibility,
-
-                  decoration: InputDecoration(
-                    isDense: true,
-                    hintText: "Kata Sandi",
-                    hintStyle: TextStyle(
-                      color: AppColor.textHint,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-
-                    contentPadding: EdgeInsets.all(12),
-
-                    prefixIcon: Icon(Icons.lock_outline, size: 20),
-                    prefixIconColor: WidgetStateColor.resolveWith((states) {
-                      if (states.contains(WidgetState.error)) {
-                        return AppColor.error;
-                      }
-                      if (states.contains(WidgetState.focused)) {
-                        return AppColor.secondary;
-                      }
-                      return AppColor.textHint;
-                    }),
-
-                    suffixIcon: InkWell(
-                      onTap: visibilityOnOff,
-                      child: Icon(
-                        size: 20,
-                        isVisibility ? Icons.visibility : Icons.visibility_off,
-                      ),
-                    ),
-                    suffixIconColor: WidgetStateColor.resolveWith((states) {
-                      if (states.contains(WidgetState.error)) {
-                        return AppColor.error;
-                      }
-                      if (states.contains(WidgetState.focused)) {
-                        return AppColor.secondary;
-                      }
-                      return AppColor.textHint;
-                    }),
-
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: AppColor.textHint),
-                    ),
-
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: AppColor.secondary),
-                    ),
-
-                    errorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: AppColor.error),
-                    ),
-
-                    focusedErrorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: AppColor.error),
-                    ),
-
-                    errorStyle: TextStyle(
-                      color: AppColor.error,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
+                  suffixIcon: InkWell(
+                    onTap: visibilityOnOff,
+                    child: Icon(
+                      size: 20,
+                      isVisibility ? Icons.visibility : Icons.visibility_off,
                     ),
                   ),
-
                   validator: (value) {
                     final password = value ?? "";
                     if (password.isEmpty) {
@@ -299,81 +123,56 @@ class _Tugas10FlutterState extends State<Tugas10Flutter> {
                   },
                 ),
 
-                SizedBox(height: 8),
+                SizedBox(height: 16),
 
-                TextFormField(
-                  controller: phoneController,
-                  cursorColor: AppColor.textHint,
-                  keyboardType: TextInputType.number,
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      if (_formKey.currentState!.validate()) {
+                        final UserModel? login = await DBHelper.loginUser(
+                          email: emailController.text,
+                          password: passwordController.text,
+                        );
 
-                  decoration: InputDecoration(
-                    isDense: true,
-                    hintText: "Nomor Telepon",
-                    hintStyle: TextStyle(
-                      color: AppColor.textHint,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-
-                    contentPadding: EdgeInsets.all(12),
-
-                    prefixIcon: Icon(Icons.phone, size: 20),
-                    prefixIconColor: WidgetStateColor.resolveWith((states) {
-                      if (states.contains(WidgetState.error)) {
-                        return AppColor.error;
+                        if (login != null) {
+                          PreferenceHandler().storingIsLogin(true);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text("Login Berhasil")),
+                          );
+                          await Future.delayed(Duration(seconds: 2));
+                          context.push(DrawerGlobal());
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                "Login Gagal, email atau password tidak terdaftar",
+                              ),
+                            ),
+                          );
+                        }
                       }
-                      if (states.contains(WidgetState.focused)) {
-                        return AppColor.secondary;
-                      }
-                      return AppColor.textHint;
-                    }),
-
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: AppColor.textHint),
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColor.secondary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      elevation: 0,
                     ),
-
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: AppColor.secondary),
-                    ),
-
-                    errorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: AppColor.error),
-                    ),
-
-                    focusedErrorBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: BorderSide(color: AppColor.error),
-                    ),
-
-                    errorStyle: TextStyle(
-                      color: AppColor.error,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
+                    child: Text(
+                      "Login",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
-
-                  validator: (value) {
-                    final phone = (value ?? '').trim();
-                    if (phone.isEmpty) {
-                      return "Nomor telepon tidak boleh kosong";
-                    }
-                    if (!RegExp(r'^\d+$').hasMatch(phone)) {
-                      return "Nomor telepon hanya boleh angka";
-                    }
-                    if (phone.length < 9) {
-                      return "Nomor telepon minimal 9 digit";
-                    }
-                    if (phone.length > 15) {
-                      return "Nomor telepon maksimal 15 digit";
-                    }
-                    return null;
-                  },
                 ),
 
-                SizedBox(height: 16),
+                SizedBox(height: 8),
 
                 SizedBox(
                   width: double.infinity,
@@ -381,15 +180,17 @@ class _Tugas10FlutterState extends State<Tugas10Flutter> {
                   child: ElevatedButton(
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
-                        // print("Berhasil tervalidasi");
-                        dialogError(context);
-                      } else {
-                        // print("Tidak Berhasil tervalidasi");
+                        DBHelper.registerUser(
+                          UserModel(
+                            email: emailController.text,
+                            password: passwordController.text,
+                          ),
+                        );
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("Pendaftaran Berhasil")),
+                        );
                       }
-                      // print(nameController.text);
-                      // print(emailController.text);
-                      // print(passwordController.text);
-                      // print(phoneController.text);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColor.secondary,
@@ -517,12 +318,23 @@ class _Tugas10FlutterState extends State<Tugas10Flutter> {
                     child: ElevatedButton(
                       onPressed: () {
                         context.pop();
-                        context.push(
-                          HomeDaftarPage(
-                            name: nameController.text,
-                            phone: phoneController.text,
-                          ),
-                        );
+                        // DBHelper.registerUser(
+                        //   UserModel(
+                        //     email: emailController.text,
+                        //     password: passwordController.text,
+                        //   ),
+                        // );
+                        // ScaffoldMessenger.of(context).showSnackBar(
+                        //   SnackBar(content: Text("Pendaftaran Berhasil")),
+                        // );
+                        PreferenceHandler().storingIsLogin(true);
+                        context.push(DrawerGlobal());
+                        // context.push(
+                        // HomeDaftarPage(
+                        // name: nameController.text,
+                        // phone: phoneController.text,
+                        // ),
+                        // );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColor.success,
