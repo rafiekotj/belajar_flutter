@@ -231,7 +231,10 @@ class _Tugas10FlutterState extends State<Tugas10Flutter> {
                   width: double.infinity,
                   height: 48,
                   child: OutlinedButton(
-                    onPressed: () {},
+                    onPressed: () async {
+                      // var dataIsLogin = PreferenceHandler.getIsLogin();
+                      // print(dataIsLogin);
+                    },
                     style: OutlinedButton.styleFrom(
                       padding: EdgeInsets.symmetric(horizontal: 16),
                       side: BorderSide(color: AppColor.textHint),
