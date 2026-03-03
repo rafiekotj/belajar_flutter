@@ -1,4 +1,6 @@
 import 'package:belajar_flutter/constant/app_color.dart';
+import 'package:belajar_flutter/tugas_10/components/custom_text_field.dart';
+import 'package:belajar_flutter/tugas_10/extension/navigator.dart';
 import 'package:flutter/material.dart';
 import 'package:belajar_flutter/tugas_11/database/pengguna_controller.dart';
 import 'package:belajar_flutter/tugas_11/models/pengguna_model.dart';
@@ -74,6 +76,24 @@ class _ListPenggunaScreenState extends State<ListPenggunaScreen> {
                                 ),
                               ),
                             ),
+                            IconButton(
+                              onPressed: () async {
+                                await showEditDialog(context, items);
+                                dataPengguna =
+                                    await PenggunaController.getAllPengguna();
+                                setState(() {});
+                              },
+                              icon: Icon(Icons.edit, color: AppColor.warning),
+                            ),
+                            IconButton(
+                              onPressed: () async {
+                                await showDeleteDialog(context, items.id!);
+                                dataPengguna =
+                                    await PenggunaController.getAllPengguna();
+                                setState(() {});
+                              },
+                              icon: Icon(Icons.delete, color: AppColor.error),
+                            ),
                           ],
                         ),
 
@@ -133,5 +153,137 @@ class _ListPenggunaScreenState extends State<ListPenggunaScreen> {
       ),
       backgroundColor: AppColor.backgroundLight,
     );
+  }
+
+  Future<void> showEditDialog(BuildContext context, PenggunaModel items) async {
+    final nameController = TextEditingController(text: items.nama);
+    final emailController = TextEditingController(text: items.email);
+    final phoneController = TextEditingController(text: items.phone);
+    final cityController = TextEditingController(text: items.city);
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: AppColor.backgroundLight,
+          title: Text("Edit Pengguna"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CustomTextField(
+                controller: nameController,
+                hintText: "Masukkan Nama",
+              ),
+              SizedBox(height: 8),
+              CustomTextField(
+                controller: emailController,
+                hintText: "Masukkan Email",
+              ),
+              SizedBox(height: 8),
+              CustomTextField(
+                controller: phoneController,
+                hintText: "Masukkan Nomor Telepon",
+              ),
+              SizedBox(height: 8),
+              CustomTextField(
+                controller: cityController,
+                hintText: "Masukkan Asal Kota",
+              ),
+              SizedBox(height: 20),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                context.pop();
+              },
+              child: Text("Batal", style: TextStyle(color: AppColor.primary)),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (items.id == null) {
+                  return;
+                }
+                await PenggunaController.updatePengguna(
+                  PenggunaModel(
+                    id: items.id,
+                    nama: nameController.text,
+                    email: emailController.text,
+                    phone: phoneController.text,
+                    city: cityController.text,
+                  ),
+                );
+                context.pop();
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text("Pengguna di update")));
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColor.secondary,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Text(
+                "Simpan",
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> showDeleteDialog(BuildContext context, int id) async {
+    final confirm = await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: AppColor.backgroundLight,
+          title: Text("Konfirmasi"),
+          content: Text("Apakah anda ingin menghapus data ini?"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                context.pop(false);
+              },
+              child: Text("Batal", style: TextStyle(color: AppColor.primary)),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                context.pop(true);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColor.error,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Text(
+                "Hapus",
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirm == true) {
+      await PenggunaController.deletePengguna(id);
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Data berhasil dihapus")));
+      setState(() {});
+    }
   }
 }

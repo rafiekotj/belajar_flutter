@@ -14,4 +14,22 @@ class PenggunaController {
     print(results.map((e) => PenggunaModel.fromMap(e)).toList());
     return results.map((e) => PenggunaModel.fromMap(e)).toList();
   }
+
+  static Future<int> updatePengguna(PenggunaModel pengguna) async {
+    final dbs = await DBHelper.db();
+    if (pengguna.id == null) {
+      throw Exception("ID Wajid ada");
+    }
+    return dbs.update(
+      'pengguna',
+      pengguna.toMap(),
+      where: 'id = ?',
+      whereArgs: [pengguna.id],
+    );
+  }
+
+  static Future<int> deletePengguna(int id) async {
+    final dbs = await DBHelper.db();
+    return dbs.delete('pengguna', where: 'id = ?', whereArgs: [id]);
+  }
 }
