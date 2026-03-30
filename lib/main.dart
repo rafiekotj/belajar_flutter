@@ -11,7 +11,8 @@
 // import 'package:belajar_flutter/tugas_10/tugas10.dart';
 import 'package:belajar_flutter/constant/app_color.dart';
 import 'package:belajar_flutter/tugas_11/database/preference.dart';
-import 'package:belajar_flutter/tugas_11/views/splash_screen.dart';
+// import 'package:belajar_flutter/tugas_11/views/splash_screen.dart';
+import 'package:belajar_flutter/tugas_14/views/home/home_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() async {
@@ -35,7 +36,7 @@ class MyApp extends StatelessWidget {
           selectionHandleColor: AppColor.secondary,
         ),
       ),
-      home: SplashScreen(),
+      home: HomeScreen(),
       // routes: {
       //   '/login': (context) => LoginPage(),
       //   '/register': (context) => RegisterPage(),
