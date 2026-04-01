@@ -7,6 +7,7 @@ class CustomTextField extends StatelessWidget {
   final IconData? prefixIcon;
   final Widget? suffixIcon;
   final bool obscureText;
+  final bool readOnly;
   final TextInputType? keyboardType;
   final String? Function(String?)? validator;
 
@@ -17,6 +18,7 @@ class CustomTextField extends StatelessWidget {
     this.prefixIcon,
     this.suffixIcon,
     this.obscureText = false,
+    this.readOnly = false,
     this.keyboardType,
     this.validator,
   });
@@ -27,6 +29,7 @@ class CustomTextField extends StatelessWidget {
       controller: controller,
       cursorColor: AppColor.textHint,
       obscureText: obscureText,
+      readOnly: readOnly,
       keyboardType: keyboardType,
       decoration: InputDecoration(
         isDense: true,
