@@ -1,12 +1,13 @@
+import 'dart:ui';
+
 import 'package:belajar_flutter/constant/api_app_color.dart';
-import 'package:belajar_flutter/tugas_14/models/anime_model.dart'
-    as anime_models;
+import 'package:belajar_flutter/tugas_14/models/anime_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class DetailScreen extends StatefulWidget {
-  final anime_models.GetAnime anime;
+  final GetAnime anime;
 
   const DetailScreen({super.key, required this.anime});
 
@@ -15,9 +16,51 @@ class DetailScreen extends StatefulWidget {
 }
 
 class _DetailScreenState extends State<DetailScreen> {
+  String? _convertEmbedToWatchUrl(String? rawUrl) {
+    if (rawUrl == null) return null;
+    final raw = rawUrl.trim();
+    if (raw.isEmpty || raw.toLowerCase() == 'null') return null;
+
+    final parsed = Uri.tryParse(raw);
+    if (parsed == null) return null;
+
+    final host = parsed.host.toLowerCase();
+    if (!host.contains('youtube.com') &&
+        !host.contains('youtube-nocookie.com')) {
+      return null;
+    }
+
+    final segments = parsed.pathSegments;
+    final embedIndex = segments.indexOf('embed');
+    if (embedIndex != -1 && embedIndex + 1 < segments.length) {
+      final id = segments[embedIndex + 1].trim();
+      if (id.isNotEmpty) {
+        return _youtubeWatchUri(id).toString();
+      }
+    }
+
+    if (segments.length >= 2 && segments.first == 'v') {
+      final id = segments[1].trim();
+      if (id.isNotEmpty) {
+        return _youtubeWatchUri(id).toString();
+      }
+    }
+
+    return null;
+  }
+
+  Uri _youtubeWatchUri(String id) {
+    return Uri.https('www.youtube.com', '/watch', {'v': id});
+  }
+
   Uri? _trailerUri() {
     final embedUrl = widget.anime.trailer?.embedUrl;
     final trailerUrl = widget.anime.trailer?.url?.toString();
+
+    final normalizedEmbed = _convertEmbedToWatchUrl(embedUrl);
+    if (normalizedEmbed != null) {
+      return Uri.tryParse(normalizedEmbed);
+    }
 
     if (embedUrl != null && embedUrl.trim().isNotEmpty) {
       return Uri.tryParse(embedUrl);
@@ -39,22 +82,6 @@ class _DetailScreenState extends State<DetailScreen> {
     return text;
   }
 
-  String _formatDate(dynamic value) {
-    if (value == null) return '-';
-    final raw = value.toString().trim();
-    if (raw.isEmpty || raw.toLowerCase() == 'null') return '-';
-
-    final parsed = DateTime.tryParse(raw);
-    if (parsed == null) {
-      final dateOnly = raw.split('T').first;
-      return dateOnly.isEmpty ? raw : dateOnly;
-    }
-
-    final mm = parsed.month.toString().padLeft(2, '0');
-    final dd = parsed.day.toString().padLeft(2, '0');
-    return '${parsed.year}-$mm-$dd';
-  }
-
   String _cleanText(dynamic value) {
     if (value == null) return '';
     final text = value.toString().trim();
@@ -62,7 +89,16 @@ class _DetailScreenState extends State<DetailScreen> {
     return text;
   }
 
-  String _joinedNames(List<anime_models.Demographic>? items) {
+  String _scoreSummary() {
+    final score = _valueOrDash(widget.anime.score);
+    final scoredBy = _valueOrDash(widget.anime.scoredBy);
+
+    if (score == '-') return '-';
+    if (scoredBy == '-') return score;
+    return '$score ($scoredBy)';
+  }
+
+  String _joinedNames(List<Demographic>? items) {
     if (items == null || items.isEmpty) return '-';
     return items
         .map((e) => e.name)
@@ -101,10 +137,6 @@ class _DetailScreenState extends State<DetailScreen> {
     final synopsis = _cleanText(anime.synopsis);
     final background = _cleanText(anime.background);
     final trailerUri = _trailerUri();
-    final titleSynonyms =
-        anime.titleSynonyms == null || anime.titleSynonyms!.isEmpty
-        ? '-'
-        : anime.titleSynonyms!.join(', ');
 
     return Scaffold(
       backgroundColor: ApiColor.background,
@@ -113,7 +145,26 @@ class _DetailScreenState extends State<DetailScreen> {
           SliverAppBar(
             expandedHeight: 430,
             pinned: true,
-            backgroundColor: Colors.transparent,
+            backgroundColor: ApiColor.background,
+            surfaceTintColor: Colors.transparent,
+            elevation: 0,
+            scrolledUnderElevation: 0,
+            leadingWidth: 56,
+            leading: Padding(
+              padding: const EdgeInsets.only(left: 10, top: 6, bottom: 6),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.55),
+                  shape: BoxShape.circle,
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back_rounded),
+                  color: Colors.white,
+                  splashRadius: 20,
+                  onPressed: () => Navigator.of(context).maybePop(),
+                ),
+              ),
+            ),
             systemOverlayStyle: SystemUiOverlayStyle.light.copyWith(
               statusBarColor: Colors.transparent,
             ),
@@ -162,7 +213,7 @@ class _DetailScreenState extends State<DetailScreen> {
                             _valueOrDash(anime.type),
                             _valueOrDash(anime.status),
                             _valueOrDash(anime.year),
-                            'Score ${_valueOrDash(anime.score)}',
+                            '⭐ ${_scoreSummary()}',
                           ],
                         ),
                       ],
@@ -178,7 +229,10 @@ class _DetailScreenState extends State<DetailScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SectionTitle(title: 'Trailer'),
+                  const SectionTitle(
+                    title: 'Trailer',
+                    icon: Icons.ondemand_video_rounded,
+                  ),
                   if (trailerUri != null)
                     SizedBox(
                       width: double.infinity,
@@ -192,8 +246,8 @@ class _DetailScreenState extends State<DetailScreen> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        icon: const Icon(Icons.play_arrow_rounded),
-                        label: const Text('Play Trailer'),
+                        icon: const Icon(Icons.open_in_new_rounded),
+                        label: const Text('Buka di YouTube'),
                       ),
                     )
                   else
@@ -209,7 +263,10 @@ class _DetailScreenState extends State<DetailScreen> {
                         style: TextStyle(color: ApiColor.textSecondary),
                       ),
                     ),
-                  const SectionTitle(title: 'Overview'),
+                  const SectionTitle(
+                    title: 'Overview',
+                    icon: Icons.auto_awesome_rounded,
+                  ),
                   InfoRow(
                     label: 'Synopsis',
                     value: synopsis.isEmpty ? '-' : synopsis,
@@ -228,7 +285,10 @@ class _DetailScreenState extends State<DetailScreen> {
                     value: background.isEmpty ? '-' : background,
                   ),
 
-                  const SectionTitle(title: 'Quick Facts'),
+                  const SectionTitle(
+                    title: 'Details',
+                    icon: Icons.bolt_rounded,
+                  ),
                   InfoRow(label: 'Type', value: _valueOrDash(anime.type)),
                   InfoRow(label: 'Year', value: _valueOrDash(anime.year)),
                   InfoRow(label: 'Season', value: _valueOrDash(anime.season)),
@@ -248,7 +308,7 @@ class _DetailScreenState extends State<DetailScreen> {
                     value: _valueOrDash(anime.duration),
                   ),
                   InfoRow(label: 'Rating', value: _valueOrDash(anime.rating)),
-                  InfoRow(label: 'Score', value: _valueOrDash(anime.score)),
+                  InfoRow(label: 'Score', value: _scoreSummary()),
                   InfoRow(label: 'Rank', value: _valueOrDash(anime.rank)),
                   InfoRow(
                     label: 'Popularity',
@@ -260,7 +320,10 @@ class _DetailScreenState extends State<DetailScreen> {
                     value: _valueOrDash(anime.favorites),
                   ),
 
-                  const SectionTitle(title: 'Production'),
+                  const SectionTitle(
+                    title: 'Production',
+                    icon: Icons.apartment_rounded,
+                  ),
                   InfoRow(
                     label: 'Producers',
                     value: _joinedNames(anime.producers),
@@ -271,7 +334,10 @@ class _DetailScreenState extends State<DetailScreen> {
                   ),
                   InfoRow(label: 'Studios', value: _joinedNames(anime.studios)),
 
-                  const SectionTitle(title: 'Genres & Themes'),
+                  const SectionTitle(
+                    title: 'Genres & Themes',
+                    icon: Icons.style_rounded,
+                  ),
                   InfoRow(label: 'Genres', value: _joinedNames(anime.genres)),
                   InfoRow(
                     label: 'Explicit Genres',
@@ -281,106 +347,6 @@ class _DetailScreenState extends State<DetailScreen> {
                   InfoRow(
                     label: 'Demographics',
                     value: _joinedNames(anime.demographics),
-                  ),
-
-                  const SectionTitle(title: 'Advanced Info'),
-                  Theme(
-                    data: Theme.of(
-                      context,
-                    ).copyWith(dividerColor: Colors.transparent),
-                    child: ExpansionTile(
-                      tilePadding: const EdgeInsets.symmetric(horizontal: 12),
-                      collapsedBackgroundColor: ApiColor.surface,
-                      backgroundColor: ApiColor.surface,
-                      collapsedShape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      iconColor: ApiColor.textPrimary,
-                      collapsedIconColor: ApiColor.textPrimary,
-                      title: const Text(
-                        'Tap untuk lihat semua data API',
-                        style: TextStyle(
-                          color: ApiColor.textPrimary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      childrenPadding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-                      children: [
-                        InfoRow(
-                          label: 'MAL ID',
-                          value: _valueOrDash(anime.malId),
-                        ),
-                        InfoRow(
-                          label: 'Approved',
-                          value: _valueOrDash(anime.approved),
-                        ),
-                        InfoRow(
-                          label: 'Scored By',
-                          value: _valueOrDash(anime.scoredBy),
-                        ),
-                        InfoRow(
-                          label: 'Background',
-                          value: background.isEmpty ? '-' : background,
-                        ),
-                        InfoRow(
-                          label: 'From',
-                          value: _formatDate(anime.aired?.from),
-                        ),
-                        InfoRow(
-                          label: 'To',
-                          value: _formatDate(anime.aired?.to),
-                        ),
-                        InfoRow(
-                          label: 'Day',
-                          value: _valueOrDash(anime.broadcast?.day),
-                        ),
-                        InfoRow(
-                          label: 'Time',
-                          value: _valueOrDash(anime.broadcast?.time),
-                        ),
-                        InfoRow(
-                          label: 'Timezone',
-                          value: _valueOrDash(anime.broadcast?.timezone),
-                        ),
-                        InfoRow(
-                          label: 'Broadcast String',
-                          value: _valueOrDash(anime.broadcast?.string),
-                        ),
-                        InfoRow(label: 'URL', value: _valueOrDash(anime.url)),
-                        InfoRow(
-                          label: 'Trailer URL',
-                          value: _valueOrDash(anime.trailer?.url),
-                        ),
-                        InfoRow(
-                          label: 'Trailer Embed URL',
-                          value: _valueOrDash(anime.trailer?.embedUrl),
-                        ),
-                        InfoRow(
-                          label: 'Youtube ID',
-                          value: _valueOrDash(anime.trailer?.youtubeId),
-                        ),
-                        InfoRow(
-                          label: 'Image URL',
-                          value: _valueOrDash(anime.images?['jpg']?.imageUrl),
-                        ),
-                        InfoRow(
-                          label: 'Large Image URL',
-                          value: _valueOrDash(
-                            anime.images?['jpg']?.largeImageUrl,
-                          ),
-                        ),
-                        InfoRow(
-                          label: 'Small Image URL',
-                          value: _valueOrDash(
-                            anime.images?['jpg']?.smallImageUrl,
-                          ),
-                        ),
-                        InfoRow(label: 'Title Synonyms', value: titleSynonyms),
-                      ],
-                    ),
                   ),
                 ],
               ),
@@ -394,20 +360,34 @@ class _DetailScreenState extends State<DetailScreen> {
 
 class SectionTitle extends StatelessWidget {
   final String title;
+  final IconData icon;
 
-  const SectionTitle({super.key, required this.title});
+  const SectionTitle({super.key, required this.title, required this.icon});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(top: 20, bottom: 10),
-      child: Text(
-        title,
-        style: const TextStyle(
-          color: ApiColor.textPrimary,
-          fontSize: 18,
-          fontWeight: FontWeight.w700,
-        ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: ApiColor.primary.withValues(alpha: 0.16),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: ApiColor.primary, size: 18),
+          ),
+          const SizedBox(width: 10),
+          Text(
+            title,
+            style: const TextStyle(
+              color: ApiColor.textPrimary,
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -461,19 +441,41 @@ class ChipWrap extends StatelessWidget {
     }
 
     return Wrap(
-      spacing: 8,
+      spacing: 4,
       runSpacing: 8,
       children: data
           .map(
-            (text) => Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                color: ApiColor.surface,
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: Text(
-                text,
-                style: const TextStyle(color: ApiColor.textPrimary),
+            (text) => ClipRRect(
+              borderRadius: BorderRadius.circular(999),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.18),
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.35),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.22),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    text,
+                    style: const TextStyle(
+                      color: ApiColor.textPrimary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
               ),
             ),
           )

@@ -9,10 +9,11 @@
 // import 'package:belajar_flutter/tugas_8/tugas8.dart';
 // import 'package:belajar_flutter/tugas_9/tugas9.dart';
 // import 'package:belajar_flutter/tugas_10/tugas10.dart';
-import 'package:belajar_flutter/constant/app_color.dart';
+// import 'package:belajar_flutter/constant/app_color.dart';
+import 'package:belajar_flutter/constant/api_app_color.dart';
 import 'package:belajar_flutter/tugas_11/database/preference.dart';
 // import 'package:belajar_flutter/tugas_11/views/splash_screen.dart';
-import 'package:belajar_flutter/tugas_14/views/home/home_screen.dart';
+import 'package:belajar_flutter/tugas_14/views/splash/splash_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() async {
@@ -32,11 +33,15 @@ class MyApp extends StatelessWidget {
       title: 'Belajar Flutter',
       theme: ThemeData(
         fontFamily: 'Inter',
+        colorScheme: ColorScheme.fromSeed(seedColor: ApiColor.primary),
+        progressIndicatorTheme: const ProgressIndicatorThemeData(
+          color: ApiColor.primary,
+        ),
         textSelectionTheme: TextSelectionThemeData(
-          selectionHandleColor: AppColor.secondary,
+          selectionHandleColor: ApiColor.primary,
         ),
       ),
-      home: HomeScreen(),
+      home: const SplashScreen(),
       // routes: {
       //   '/login': (context) => LoginPage(),
       //   '/register': (context) => RegisterPage(),

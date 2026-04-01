@@ -21,6 +21,35 @@ class _HomeScreenState extends State<HomeScreen> {
   int _featuredCount = 0;
   int _currentFeaturedIndex = 0;
 
+  static const double _featuredHeight = 660;
+
+  // Anime dengan skor tertinggi
+  List<GetAnime> _getTopRatedAnime(List<GetAnime> animeList) {
+    final sortedList = List<GetAnime>.from(animeList)
+      ..sort((a, b) => (b.score ?? 0).compareTo(a.score ?? 0));
+    return sortedList;
+  }
+
+  // Anime paling populer
+  List<GetAnime> _getPopularAnime(List<GetAnime> animeList) {
+    final sortedList = List<GetAnime>.from(animeList)
+      ..sort((a, b) => (b.popularity ?? 0).compareTo(a.popularity ?? 0));
+    return sortedList;
+  }
+
+  // Filter anime berdasarkan genre
+  List<GetAnime> _getAnimeByGenre(List<GetAnime> animeList, String genreName) {
+    return animeList
+        .where(
+          (anime) =>
+              anime.genres?.any(
+                (genre) => genre.name?.toLowerCase() == genreName.toLowerCase(),
+              ) ??
+              false,
+        )
+        .toList();
+  }
+
   @override
   void initState() {
     super.initState();
@@ -37,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     if (itemCount <= 1) return;
 
-    _featuredTimer = Timer.periodic(const Duration(seconds: 4), (_) {
+    _featuredTimer = Timer.periodic(const Duration(seconds: 4), (timer) {
       if (!mounted || !_featuredPageController.hasClients) return;
       _currentFeaturedIndex = (_currentFeaturedIndex + 1) % itemCount;
       _featuredPageController.animateToPage(
@@ -46,13 +75,6 @@ class _HomeScreenState extends State<HomeScreen> {
         curve: Curves.easeInOut,
       );
     });
-  }
-
-  void _openDetail(GetAnime anime) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => DetailScreen(anime: anime)),
-    );
   }
 
   @override
@@ -65,42 +87,14 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        title: Text(
-          "NimeShow",
-          style: TextStyle(
-            color: ApiColor.textPrimary,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        systemOverlayStyle: SystemUiOverlayStyle.light.copyWith(
-          statusBarColor: Colors.transparent,
-        ),
-        scrolledUnderElevation: 0,
-        surfaceTintColor: Colors.transparent,
-        shadowColor: Colors.transparent,
-        backgroundColor: Colors.transparent,
-        foregroundColor: ApiColor.textPrimary,
-        forceMaterialTransparency: true,
-        elevation: 0,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 12),
-            child: CircleAvatar(
-              radius: 16,
-              backgroundColor: ApiColor.surface,
-              child: const Icon(Icons.person, color: ApiColor.textPrimary),
-            ),
-          ),
-        ],
-      ),
       backgroundColor: ApiColor.background,
       body: FutureBuilder<List<GetAnime>>(
         future: _animeFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(
+              child: CircularProgressIndicator(color: ApiColor.primary),
+            );
           }
 
           if (snapshot.hasError) {
@@ -113,37 +107,48 @@ class _HomeScreenState extends State<HomeScreen> {
           }
 
           final data = snapshot.data ?? [];
-          final topRated = List<GetAnime>.from(data)
-            ..sort((a, b) => (b.score ?? 0).compareTo(a.score ?? 0));
+          final topRated = _getTopRatedAnime(data);
           final featuredTopFive = topRated.take(5).toList();
           _setupFeaturedAutoScroll(featuredTopFive.length);
-          final popular = List<GetAnime>.from(data)
-            ..sort((a, b) => (b.popularity ?? 0).compareTo(a.popularity ?? 0));
-          final action = data
-              .where(
-                (a) =>
-                    a.genres?.any((g) => g.name?.toLowerCase() == 'action') ??
-                    false,
-              )
-              .toList();
-          final adventure = data
-              .where(
-                (a) =>
-                    a.genres?.any(
-                      (g) => g.name?.toLowerCase() == 'adventure',
-                    ) ??
-                    false,
-              )
-              .toList();
+          final popular = _getPopularAnime(data);
+          final action = _getAnimeByGenre(data, 'action');
+          final adventure = _getAnimeByGenre(data, 'adventure');
 
-          return SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Featured
-                SizedBox(
-                  height: 660,
-                  child: Stack(
+          return CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                expandedHeight: _featuredHeight,
+                pinned: true,
+                backgroundColor: ApiColor.appBar,
+                systemOverlayStyle: SystemUiOverlayStyle.light.copyWith(
+                  statusBarColor: Colors.transparent,
+                ),
+                scrolledUnderElevation: 0,
+                surfaceTintColor: Colors.transparent,
+                shadowColor: Colors.transparent,
+                elevation: 0,
+                title: const Text(
+                  'NimeShow',
+                  style: TextStyle(
+                    color: ApiColor.textPrimary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                actions: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 12),
+                    child: CircleAvatar(
+                      radius: 16,
+                      backgroundColor: ApiColor.primary,
+                      child: const Icon(
+                        Icons.person,
+                        color: ApiColor.textPrimary,
+                      ),
+                    ),
+                  ),
+                ],
+                flexibleSpace: FlexibleSpaceBar(
+                  background: Stack(
                     fit: StackFit.expand,
                     children: [
                       PageView.builder(
@@ -159,7 +164,15 @@ class _HomeScreenState extends State<HomeScreen> {
                         itemBuilder: (context, index) {
                           final featuredAnime = featuredTopFive[index];
                           return GestureDetector(
-                            onTap: () => _openDetail(featuredAnime),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      DetailScreen(anime: featuredAnime),
+                                ),
+                              );
+                            },
                             child: Stack(
                               fit: StackFit.expand,
                               children: [
@@ -269,146 +282,178 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                 ),
-
-                SizedBox(height: 16),
-
-                // Popular Now
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Popular Now 🔥',
-                        style: TextStyle(
-                          color: ApiColor.textPrimary,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Popular Now 🔥',
+                              style: TextStyle(
+                                color: ApiColor.textPrimary,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            SizedBox(
+                              height: 228,
+                              child: ListView(
+                                scrollDirection: Axis.horizontal,
+                                children: popular
+                                    .take(10)
+                                    .map(
+                                      (anime) => AnimeHorizontalItem(
+                                        anime: anime,
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  DetailScreen(anime: anime),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    )
+                                    .toList(),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 10),
-                      SizedBox(
-                        height: 228,
-                        child: ListView(
-                          scrollDirection: Axis.horizontal,
-                          children: popular
-                              .take(10)
-                              .map(
-                                (anime) => AnimeHorizontalItem(
-                                  anime: anime,
-                                  onTap: () => _openDetail(anime),
-                                ),
-                              )
-                              .toList(),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Top Rated ⭐',
+                              style: TextStyle(
+                                color: ApiColor.textPrimary,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            SizedBox(
+                              height: 228,
+                              child: ListView(
+                                scrollDirection: Axis.horizontal,
+                                children: topRated
+                                    .take(10)
+                                    .map(
+                                      (anime) => AnimeHorizontalItem(
+                                        anime: anime,
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  DetailScreen(anime: anime),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    )
+                                    .toList(),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Action 💥',
+                              style: TextStyle(
+                                color: ApiColor.textPrimary,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            SizedBox(
+                              height: 228,
+                              child: ListView(
+                                scrollDirection: Axis.horizontal,
+                                children: action
+                                    .take(10)
+                                    .map(
+                                      (anime) => AnimeHorizontalItem(
+                                        anime: anime,
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  DetailScreen(anime: anime),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    )
+                                    .toList(),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Adventure 🏃',
+                              style: TextStyle(
+                                color: ApiColor.textPrimary,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            SizedBox(
+                              height: 228,
+                              child: ListView(
+                                scrollDirection: Axis.horizontal,
+                                children: adventure
+                                    .take(10)
+                                    .map(
+                                      (anime) => AnimeHorizontalItem(
+                                        anime: anime,
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  DetailScreen(anime: anime),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    )
+                                    .toList(),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
                 ),
-
-                // Top Rated
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Top Rated ⭐',
-                        style: TextStyle(
-                          color: ApiColor.textPrimary,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      SizedBox(
-                        height: 228,
-                        child: ListView(
-                          scrollDirection: Axis.horizontal,
-                          children: topRated
-                              .take(10)
-                              .map(
-                                (anime) => AnimeHorizontalItem(
-                                  anime: anime,
-                                  onTap: () => _openDetail(anime),
-                                ),
-                              )
-                              .toList(),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Action
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Action 💥',
-                        style: TextStyle(
-                          color: ApiColor.textPrimary,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      SizedBox(
-                        height: 228,
-                        child: ListView(
-                          scrollDirection: Axis.horizontal,
-                          children: action
-                              .take(10)
-                              .map(
-                                (anime) => AnimeHorizontalItem(
-                                  anime: anime,
-                                  onTap: () => _openDetail(anime),
-                                ),
-                              )
-                              .toList(),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Adventure
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Adventure 🏃',
-                        style: TextStyle(
-                          color: ApiColor.textPrimary,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      SizedBox(
-                        height: 228,
-                        child: ListView(
-                          scrollDirection: Axis.horizontal,
-                          children: adventure
-                              .take(10)
-                              .map(
-                                (anime) => AnimeHorizontalItem(
-                                  anime: anime,
-                                  onTap: () => _openDetail(anime),
-                                ),
-                              )
-                              .toList(),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           );
         },
       ),
